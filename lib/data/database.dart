@@ -16,49 +16,54 @@ class TaskDataSource {
     return await sql.openDatabase(
       path.join(dbPath, 'tasksTable.db'),
       onCreate: (db, version) {
+        //index has been put into double quotes as index is a reserved keyword in sql
         return db.execute(
-            'CREATE TABLE tasks(index TEXT, title TEXT, description TEXT, isDone bool)');
+            'CREATE TABLE tasks("index" TEXT PRIMARY KEY, title TEXT, description TEXT, isDone INTEGER)');
       },
-      version: 1,
+      version: 2,
     );
   }
 
   Future<void> addTask(ToDo task, int index) async {
     final db = await database;
 
-    db.insert('tasks', {
-      'index': index,
-      'title': task.title,
-      'description': task.description,
-      'isDone': task.isDone,
-    });
+    await db.insert(
+      'tasks',
+      {
+        '"index"': index,
+        'title': task.title,
+        'description': task.description,
+        'isDone': task.isDone ? 1 : 0,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Future<int> updateTask(ToDo task, index) async {
     final db = await database;
-    return db.update(
+    return await db.update(
       'tasks',
       {
-        'index': index,
+        '"index"': index,
         'title': task.title,
         'description': task.description,
-        'isDone': task.isDone,
+        'isDone': task.isDone ? 1 : 0,
       },
-      where: 'index = ?',
+      where: '"index" = ?',
       whereArgs: [index],
     );
   }
 
   Future<void> deleteTask(int index) async {
     final db = await database;
-    db.delete(
+    await db.delete(
       'tasks',
-      where: 'index = ?',
+      where: '"index" = ?',
       whereArgs: [index],
     );
   }
 
-  Future<List<ToDo>> getAllTasks() async {
+  Future<List<ToDo>>? getAllTasks() async {
     final db = await database;
     final List<Map<String, dynamic>> data = await db.query('tasks');
     return data
@@ -66,9 +71,16 @@ class TaskDataSource {
           (row) => ToDo(
             title: row['title'],
             description: row['description'],
-            isDone: row['isDone'],
+            isDone: row['isDone'] == 1 ? true : false,
           ),
         )
         .toList();
+  }
+
+  Future<void> deleteAllTasks() async {
+    final db = await database;
+    await db.delete(
+      'tasks',
+    );
   }
 }

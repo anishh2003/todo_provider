@@ -1,23 +1,39 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:todo_provider/data/todo_data.dart';
+import 'package:todo_provider/data/database.dart';
 import 'package:todo_provider/models/todo.dart';
 
 class ManageToDosNotifier extends StateNotifier<List<ToDo>> {
   ManageToDosNotifier() : super([]);
 
+  final TaskDataSource datasource = TaskDataSource();
+
+  Future<List<ToDo>>? getallStoredTasks() async {
+    final storedList = await datasource.getAllTasks() ?? [];
+    state = storedList;
+    return state;
+  }
+
   void addTask(ToDo task) {
     state = [...state, task];
+    datasource.addTask(task, state.length - 1);
   }
 
   void removeTask(int index) {
     state.removeAt(index);
     state = [...state];
+    datasource.deleteTask(index);
   }
 
   void updateTask(ToDo task, int index) {
     List<ToDo> tempList = List.from(state);
     tempList[index] = tempList[index].copyWith(isDone: !state[index].isDone);
     state = [...tempList];
+    datasource.updateTask(tempList[index], index);
+  }
+
+  void removeAllTasks() {
+    state = [];
+    datasource.deleteAllTasks();
   }
 }
 
