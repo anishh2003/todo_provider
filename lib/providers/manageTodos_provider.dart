@@ -15,14 +15,12 @@ class ManageToDosNotifier extends StateNotifier<List<ToDo>> {
 
   void addTask(ToDo task) {
     state = [...state, task];
-    // datasource.addTask(task, state.length - 1);
     datasource.updateList(state);
   }
 
   void removeTask(int index) {
     state.removeAt(index);
     state = [...state];
-    // datasource.deleteTask(index);
     datasource.updateList(state);
   }
 
@@ -30,7 +28,6 @@ class ManageToDosNotifier extends StateNotifier<List<ToDo>> {
     List<ToDo> tempList = List.from(state);
     tempList[index] = tempList[index].copyWith(isDone: !state[index].isDone);
     state = [...tempList];
-    // datasource.updateTask(tempList[index], index);
     datasource.updateList(state);
   }
 

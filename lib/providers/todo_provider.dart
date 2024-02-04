@@ -6,7 +6,3 @@ import 'package:todo_provider/providers/manageTodos_provider.dart';
 // final tasksProvider = Provider((ref) {
 //   return dummyTasks;
 // });
-
-// final tasksProvider = FutureProvider((ref) async {
-//   return await ref.read(manageTasksProvider.notifier).getallStoredTasks();
-// });
