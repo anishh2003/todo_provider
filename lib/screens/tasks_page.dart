@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:todo_provider/data/database.dart';
 import 'package:todo_provider/models/todo.dart';
 import 'package:todo_provider/providers/manageTodos_provider.dart';
-import 'package:todo_provider/providers/todo_provider.dart';
 
 class ToDoPage extends ConsumerStatefulWidget {
   const ToDoPage({super.key});
@@ -17,20 +15,15 @@ class _ToDoPageState extends ConsumerState<ToDoPage> {
   late TextEditingController titleController;
   late TextEditingController descriptionController;
 
-  Future<List<ToDo>> function() async {
-    await TaskDataSource().database;
-    return await ref.read(manageTasksProvider.notifier).getallStoredTasks() ??
-        [];
-  }
-
   @override
   initState() {
     super.initState();
     titleController = TextEditingController();
     descriptionController = TextEditingController();
 
-    function().then((List<ToDo> value) {
-      return;
+    // Use Future.delayed to defer the execution until after the build phase.
+    Future.delayed(Duration.zero, () {
+      ref.read(manageTasksProvider.notifier).getallStoredTasks() ?? [];
     });
   }
 
