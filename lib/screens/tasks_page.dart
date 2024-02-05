@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:todo_provider/data/database.dart';
 import 'package:todo_provider/models/todo.dart';
 import 'package:todo_provider/providers/manageTodos_provider.dart';
 import 'package:todo_provider/providers/todo_provider.dart';
@@ -15,12 +17,19 @@ class ToDoPage extends ConsumerStatefulWidget {
 class _ToDoPageState extends ConsumerState<ToDoPage> {
   late TextEditingController titleController;
   late TextEditingController descriptionController;
+  late SharedPreferences sharedPreferences;
+
+  Future<void> initSharedPreferences() async {
+    await TaskDataSource().initialiseDatabase();
+    ref.read(manageTasksProvider.notifier).getallStoredTasks() ?? [];
+  }
 
   @override
   initState() {
     super.initState();
     titleController = TextEditingController();
     descriptionController = TextEditingController();
+    initSharedPreferences();
   }
 
   @override
@@ -94,9 +103,19 @@ class _ToDoPageState extends ConsumerState<ToDoPage> {
     final manageTasks = ref.watch(manageTasksProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Center(
-          child: Text('To Do List'),
-        ),
+        title: const Text('To Do List'),
+        actions: [
+          Row(
+            children: [
+              const Text("Delete All"),
+              IconButton(
+                  onPressed: () {
+                    ref.read(manageTasksProvider.notifier).removeAllTasks();
+                  },
+                  icon: const Icon(Icons.delete)),
+            ],
+          )
+        ],
         backgroundColor: Colors.amber,
       ),
       floatingActionButton: FloatingActionButton(
